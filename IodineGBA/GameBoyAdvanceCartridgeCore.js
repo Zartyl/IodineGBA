@@ -150,54 +150,35 @@ GameBoyAdvanceCartridge.prototype.IDLookup = function () {
 	}
 }
 GameBoyAdvanceCartridge.prototype.isFLASHCart = function (index) {
-	if (String.fromCharCode(this.ROM[++index]) == "L") {
-		if (String.fromCharCode(this.ROM[++index]) == "A") {
-			if (String.fromCharCode(this.ROM[++index]) == "S") {
-				if (String.fromCharCode(this.ROM[++index]) == "H") {
-					switch (String.fromCharCode(this.ROM[index])) {
-						case "_":
-						case "5":
-							this.saveType = 1;
-							this.saveSize = 0x10000;
-							return true;
-						case "1":
-							this.saveType = 1;
-							this.saveSize = 0x20000;
-							return true;
-					}
-				}
-			}
+	match = [76, 65, 83, 72]; // charCodes for "L", "A", "S", "H"
+	if (this.ROM.split(index, index + 4).equals(match)) {
+		index += 4; // jump to the fifth relevant ROM address
+		// char codes of ["_", "5", "1"]
+		if ([95, 53, 49].indexOf(this.ROM[index]) > -1) {
+			this.saveType = 1;
+			this.saveSize = this.ROM[index] == 49 ? 0x20000 : 0x10000;
+			return true;
 		}
 	}
 	return false;
 }
 GameBoyAdvanceCartridge.prototype.isRTCCart = function (index) {
-	if (String.fromCharCode(this.ROM[++index]) == "T") {
-		if (String.fromCharCode(this.ROM[++index]) == "C") {
-			if (String.fromCharCode(this.ROM[++index]) == "_") {
-				if (String.fromCharCode(this.ROM[index]) == "V") {
-					this.saveRTC = true;
-					return true;
-				}
-			}
-		}
+	match = [84, 67, 95, 86]; // charCodes for "T", "C", "_", "V"
+	if (this.ROM.split(index, index + 4).equals(match)) {
+		this.saveRTC = true;
+		return true;
 	}
 	return false;
 }
 GameBoyAdvanceCartridge.prototype.isSRAMCart = function (index) {
-	if (String.fromCharCode(this.ROM[++index]) == "R") {
-		if (String.fromCharCode(this.ROM[++index]) == "A") {
-			if (String.fromCharCode(this.ROM[++index]) == "M") {
-				if (String.fromCharCode(this.ROM[++index]) == "_") {
-					if (String.fromCharCode(this.ROM[index]) == "V") {
-						this.saveType = 2;
-						this.saveSize = 0x8000;
-						return true;
-					}
-				}
-			}
-		}
+	match = [82, 65, 77, 95, 86]; // charCodes for "R", "A", "M", "_", "V"
+	
+	if (this.ROM.split(index, index + 5).equals(match)) {
+		this.saveType = 2;
+		this.saveSize = 0x8000;
+		return true;
 	}
+
 	return false;
 }
 GameBoyAdvanceCartridge.prototype.loadExisting = function () {
